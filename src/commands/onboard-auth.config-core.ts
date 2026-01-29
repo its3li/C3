@@ -45,8 +45,8 @@ export function applyZaiConfig(cfg: MoltbotConfig): MoltbotConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: ZAI_DEFAULT_MODEL_REF,
         },
@@ -105,8 +105,8 @@ export function applyVercelAiGatewayConfig(cfg: MoltbotConfig): MoltbotConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: VERCEL_AI_GATEWAY_DEFAULT_MODEL_REF,
         },
@@ -127,8 +127,8 @@ export function applyOpenrouterConfig(cfg: MoltbotConfig): MoltbotConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: OPENROUTER_DEFAULT_MODEL_REF,
         },
@@ -192,8 +192,8 @@ export function applyMoonshotConfig(cfg: MoltbotConfig): MoltbotConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: MOONSHOT_DEFAULT_MODEL_REF,
         },
@@ -257,8 +257,8 @@ export function applyKimiCodeConfig(cfg: MoltbotConfig): MoltbotConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: KIMI_CODE_MODEL_REF,
         },
@@ -326,8 +326,8 @@ export function applySyntheticConfig(cfg: MoltbotConfig): MoltbotConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: SYNTHETIC_DEFAULT_MODEL_REF,
         },
@@ -401,10 +401,95 @@ export function applyVeniceConfig(cfg: MoltbotConfig): MoltbotConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: VENICE_DEFAULT_MODEL_REF,
+        },
+      },
+    },
+  };
+}
+
+const POLLINATIONS_BASE_URL = "https://gen.pollinations.ai/v1";
+const POLLINATIONS_DEFAULT_MODEL_ID = "openai";
+const POLLINATIONS_DEFAULT_MODEL_REF = "pollinations/openai";
+
+/**
+ * Apply Pollinations provider configuration without changing the default model.
+ * Registers Pollinations models and sets up the provider, but preserves existing model selection.
+ */
+export function applyPollinationsProviderConfig(cfg: MoltbotConfig): MoltbotConfig {
+  const models = { ...cfg.agents?.defaults?.models };
+  models[POLLINATIONS_DEFAULT_MODEL_REF] = {
+    ...models[POLLINATIONS_DEFAULT_MODEL_REF],
+    alias: models[POLLINATIONS_DEFAULT_MODEL_REF]?.alias ?? "Pollinations AI",
+  };
+
+  const providers = { ...cfg.models?.providers };
+  const existingProvider = providers.pollinations;
+  const existingModels = Array.isArray(existingProvider?.models) ? existingProvider.models : [];
+  const defaultModel = {
+    id: POLLINATIONS_DEFAULT_MODEL_ID,
+    name: "Pollinations OpenAI",
+    reasoning: false,
+    input: ["text"] as ("text" | "image")[],
+    cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+    contextWindow: 128000,
+    maxTokens: 8192,
+  };
+  const hasDefaultModel = existingModels.some((model) => model.id === POLLINATIONS_DEFAULT_MODEL_ID);
+  const mergedModels = hasDefaultModel ? existingModels : [...existingModels, defaultModel];
+  const { apiKey: existingApiKey, ...existingProviderRest } = (existingProvider ?? {}) as Record<
+    string,
+    unknown
+  > as { apiKey?: string };
+  const resolvedApiKey = typeof existingApiKey === "string" ? existingApiKey : undefined;
+  const normalizedApiKey = resolvedApiKey?.trim();
+  providers.pollinations = {
+    ...existingProviderRest,
+    baseUrl: POLLINATIONS_BASE_URL,
+    api: "openai-completions",
+    ...(normalizedApiKey ? { apiKey: normalizedApiKey } : {}),
+    models: mergedModels.length > 0 ? mergedModels : [defaultModel],
+  };
+
+  return {
+    ...cfg,
+    agents: {
+      ...cfg.agents,
+      defaults: {
+        ...cfg.agents?.defaults,
+        models,
+      },
+    },
+    models: {
+      mode: cfg.models?.mode ?? "merge",
+      providers,
+    },
+  };
+}
+
+/**
+ * Apply Pollinations provider configuration AND set Pollinations as the default model.
+ * Use this when Pollinations is the primary provider choice during onboarding.
+ */
+export function applyPollinationsConfig(cfg: MoltbotConfig): MoltbotConfig {
+  const next = applyPollinationsProviderConfig(cfg);
+  const existingModel = next.agents?.defaults?.model;
+  return {
+    ...next,
+    agents: {
+      ...next.agents,
+      defaults: {
+        ...next.agents?.defaults,
+        model: {
+          ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
+            ? {
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
+            : undefined),
+          primary: POLLINATIONS_DEFAULT_MODEL_REF,
         },
       },
     },
@@ -437,18 +522,18 @@ export function applyAuthProfileConfig(
   const reorderedProviderOrder =
     existingProviderOrder && preferProfileFirst
       ? [
-          params.profileId,
-          ...existingProviderOrder.filter((profileId) => profileId !== params.profileId),
-        ]
+        params.profileId,
+        ...existingProviderOrder.filter((profileId) => profileId !== params.profileId),
+      ]
       : existingProviderOrder;
   const order =
     existingProviderOrder !== undefined
       ? {
-          ...cfg.auth?.order,
-          [params.provider]: reorderedProviderOrder?.includes(params.profileId)
-            ? reorderedProviderOrder
-            : [...(reorderedProviderOrder ?? []), params.profileId],
-        }
+        ...cfg.auth?.order,
+        [params.provider]: reorderedProviderOrder?.includes(params.profileId)
+          ? reorderedProviderOrder
+          : [...(reorderedProviderOrder ?? []), params.profileId],
+      }
       : cfg.auth?.order;
   return {
     ...cfg,
