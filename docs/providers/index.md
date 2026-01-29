@@ -44,6 +44,7 @@ See [Venice AI](/providers/venice).
 - [Z.AI](/providers/zai)
 - [GLM models](/providers/glm)
 - [MiniMax](/providers/minimax)
+- [Pollinations AI](/providers/pollinations)
 - [Venius (Venice AI, privacy-focused)](/providers/venice)
 - [Ollama (local models)](/providers/ollama)
 

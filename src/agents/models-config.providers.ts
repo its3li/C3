@@ -75,6 +75,17 @@ const OLLAMA_DEFAULT_COST = {
   cacheWrite: 0,
 };
 
+const POLLINATIONS_BASE_URL = "https://gen.pollinations.ai/v1";
+const POLLINATIONS_DEFAULT_MODEL_ID = "glm";
+const POLLINATIONS_DEFAULT_CONTEXT_WINDOW = 128000;
+const POLLINATIONS_DEFAULT_MAX_TOKENS = 8192;
+const POLLINATIONS_DEFAULT_COST = {
+  input: 0,
+  output: 0,
+  cacheRead: 0,
+  cacheWrite: 0,
+};
+
 interface OllamaModel {
   name: string;
   modified_at: string;
@@ -350,6 +361,24 @@ async function buildVeniceProvider(): Promise<ProviderConfig> {
   };
 }
 
+function buildPollinationsProvider(): ProviderConfig {
+  return {
+    baseUrl: POLLINATIONS_BASE_URL,
+    api: "openai-completions",
+    models: [
+      {
+        id: POLLINATIONS_DEFAULT_MODEL_ID,
+        name: "GLM",
+        reasoning: false,
+        input: ["text"],
+        cost: POLLINATIONS_DEFAULT_COST,
+        contextWindow: POLLINATIONS_DEFAULT_CONTEXT_WINDOW,
+        maxTokens: POLLINATIONS_DEFAULT_MAX_TOKENS,
+      },
+    ],
+  };
+}
+
 async function buildOllamaProvider(): Promise<ProviderConfig> {
   const models = await discoverOllamaModels();
   return {
@@ -408,6 +437,13 @@ export async function resolveImplicitProviders(params: {
       ...buildQwenPortalProvider(),
       apiKey: QWEN_PORTAL_OAUTH_PLACEHOLDER,
     };
+  }
+
+  const pollinationsKey =
+    resolveEnvApiKeyVarName("pollinations") ??
+    resolveApiKeyFromProfiles({ provider: "pollinations", store: authStore });
+  if (pollinationsKey) {
+    providers.pollinations = { ...buildPollinationsProvider(), apiKey: pollinationsKey };
   }
 
   // Ollama provider - only add if explicitly configured
