@@ -20,7 +20,8 @@ export type AuthChoiceGroupId =
   | "minimax"
   | "synthetic"
   | "venice"
-  | "qwen";
+  | "qwen"
+  | "pollinations";
 
 export type AuthChoiceGroup = {
   value: AuthChoiceGroupId;
@@ -35,85 +36,91 @@ const AUTH_CHOICE_GROUP_DEFS: {
   hint?: string;
   choices: AuthChoice[];
 }[] = [
-  {
-    value: "openai",
-    label: "OpenAI",
-    hint: "Codex OAuth + API key",
-    choices: ["openai-codex", "openai-api-key"],
-  },
-  {
-    value: "anthropic",
-    label: "Anthropic",
-    hint: "setup-token + API key",
-    choices: ["token", "apiKey"],
-  },
-  {
-    value: "minimax",
-    label: "MiniMax",
-    hint: "M2.1 (recommended)",
-    choices: ["minimax-api", "minimax-api-lightning"],
-  },
-  {
-    value: "qwen",
-    label: "Qwen",
-    hint: "OAuth",
-    choices: ["qwen-portal"],
-  },
-  {
-    value: "synthetic",
-    label: "Synthetic",
-    hint: "Anthropic-compatible (multi-model)",
-    choices: ["synthetic-api-key"],
-  },
-  {
-    value: "venice",
-    label: "Venice AI",
-    hint: "Privacy-focused (uncensored models)",
-    choices: ["venice-api-key"],
-  },
-  {
-    value: "google",
-    label: "Google",
-    hint: "Gemini API key + OAuth",
-    choices: ["gemini-api-key", "google-antigravity", "google-gemini-cli"],
-  },
-  {
-    value: "copilot",
-    label: "Copilot",
-    hint: "GitHub + local proxy",
-    choices: ["github-copilot", "copilot-proxy"],
-  },
-  {
-    value: "openrouter",
-    label: "OpenRouter",
-    hint: "API key",
-    choices: ["openrouter-api-key"],
-  },
-  {
-    value: "ai-gateway",
-    label: "Vercel AI Gateway",
-    hint: "API key",
-    choices: ["ai-gateway-api-key"],
-  },
-  {
-    value: "moonshot",
-    label: "Moonshot AI",
-    hint: "Kimi K2 + Kimi Code",
-    choices: ["moonshot-api-key", "kimi-code-api-key"],
-  },
-  {
-    value: "zai",
-    label: "Z.AI (GLM 4.7)",
-    hint: "API key",
-    choices: ["zai-api-key"],
-  },
-  {
-    value: "opencode-zen",
-    label: "OpenCode Zen",
-    hint: "API key",
-    choices: ["opencode-zen"],
-  },
-];
+    {
+      value: "openai",
+      label: "OpenAI",
+      hint: "Codex OAuth + API key",
+      choices: ["openai-codex", "openai-api-key"],
+    },
+    {
+      value: "anthropic",
+      label: "Anthropic",
+      hint: "setup-token + API key",
+      choices: ["token", "apiKey"],
+    },
+    {
+      value: "minimax",
+      label: "MiniMax",
+      hint: "M2.1 (recommended)",
+      choices: ["minimax-api", "minimax-api-lightning"],
+    },
+    {
+      value: "qwen",
+      label: "Qwen",
+      hint: "OAuth",
+      choices: ["qwen-portal"],
+    },
+    {
+      value: "synthetic",
+      label: "Synthetic",
+      hint: "Anthropic-compatible (multi-model)",
+      choices: ["synthetic-api-key"],
+    },
+    {
+      value: "venice",
+      label: "Venice AI",
+      hint: "Privacy-focused (uncensored models)",
+      choices: ["venice-api-key"],
+    },
+    {
+      value: "google",
+      label: "Google",
+      hint: "Gemini API key + OAuth",
+      choices: ["gemini-api-key", "google-antigravity", "google-gemini-cli"],
+    },
+    {
+      value: "copilot",
+      label: "Copilot",
+      hint: "GitHub + local proxy",
+      choices: ["github-copilot", "copilot-proxy"],
+    },
+    {
+      value: "openrouter",
+      label: "OpenRouter",
+      hint: "API key",
+      choices: ["openrouter-api-key"],
+    },
+    {
+      value: "ai-gateway",
+      label: "Vercel AI Gateway",
+      hint: "API key",
+      choices: ["ai-gateway-api-key"],
+    },
+    {
+      value: "moonshot",
+      label: "Moonshot AI",
+      hint: "Kimi K2 + Kimi Code",
+      choices: ["moonshot-api-key", "kimi-code-api-key"],
+    },
+    {
+      value: "zai",
+      label: "Z.AI (GLM 4.7)",
+      hint: "API key",
+      choices: ["zai-api-key"],
+    },
+    {
+      value: "opencode-zen",
+      label: "OpenCode Zen",
+      hint: "API key",
+      choices: ["opencode-zen"],
+    },
+    {
+      value: "pollinations",
+      label: "Pollinations AI",
+      hint: "Free API (OpenAI-compatible)",
+      choices: ["pollinations-api-key"],
+    },
+  ];
 
 export function buildAuthChoiceOptions(params: {
   store: AuthProfileStore;
@@ -178,6 +185,11 @@ export function buildAuthChoiceOptions(params: {
     hint: "Claude, GPT, Gemini via opencode.ai/zen",
   });
   options.push({ value: "minimax-api", label: "MiniMax M2.1" });
+  options.push({
+    value: "pollinations-api-key",
+    label: "Pollinations AI API key",
+    hint: "Free OpenAI-compatible inference",
+  });
   options.push({
     value: "minimax-api-lightning",
     label: "MiniMax M2.1 Lightning",
